@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.routes.system import router as system_router
+from app.api.v1.router import api_router
 from app.core.config import settings
 
 # Initialize FastAPI application using configuration settings
@@ -9,8 +9,8 @@ app = FastAPI(
     version=settings.version,
 )
 
-# Include application routers
-app.include_router(system_router)
+# Include versioned API router under /api/v1
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/")
