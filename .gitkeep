@@ -1,0 +1,12 @@
+backend/
+    .gitkeep
+frontend/
+    .gitkeep
+database/
+    .gitkeep
+experiments/
+    .gitkeep
+scripts/
+    .gitkeep
+tests/
+    .gitkeep
