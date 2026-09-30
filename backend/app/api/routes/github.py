@@ -1,6 +1,8 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, Path, status
 
 from app.schemas.github import GitHubProfileResponse
+from app.schemas.github_repository import GitHubRepositoryResponse
 from app.services.github_service import (
     GitHubAPIError,
     GitHubUserNotFoundError,
@@ -31,6 +33,44 @@ async def get_github_profile(
     try:
         profile_data = await github_service.get_user_profile(username=username)
         return GitHubProfileResponse(**profile_data)
+    except GitHubUserNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except GitHubAPIError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail=str(exc),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while processing the request.",
+        )
+
+
+@router.get(
+    "/{username}/repos",
+    response_model=List[GitHubRepositoryResponse],
+    summary="Get GitHub User Repositories",
+    description="Fetch public repositories for a specified GitHub username.",
+)
+async def get_github_repositories(
+    username: str = Path(..., description="The GitHub username to query")
+) -> List[GitHubRepositoryResponse]:
+    """
+    Retrieve public repositories for the specified GitHub user.
+
+    Args:
+        username: GitHub username provided as a path parameter.
+
+    Returns:
+        List[GitHubRepositoryResponse]: Validated list of user repositories.
+    """
+    try:
+        repos_data = await github_service.get_user_repositories(username=username)
+        return [GitHubRepositoryResponse(**repo) for repo in repos_data]
     except GitHubUserNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
