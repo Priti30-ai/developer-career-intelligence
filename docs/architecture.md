@@ -99,4 +99,32 @@ Normalized Skills
 - Converts unstructured plain text resumes into structured sections: Summary, Skills, Education, Experience, Projects, Certifications, and Achievements.
 - Normalizes extracted skills using `normalize_technology_name` from the shared technology service, ensuring alias canonicalization and deduplication.
 - Extracts structured education credentials, work experience/internships, and projects with associated technologies.
-- *(Note: Resume Skill Profile and Resume-vs-Code Evidence Analysis will be integrated in subsequent milestones).*
+
+### 7. Resume vs GitHub Evidence Analysis (Deterministic Foundation)
+- **Service**: `app.services.evidence_service.EvidenceService`
+- **Schemas**: `app.schemas.evidence.EvidenceAnalysisRequest`, `app.schemas.evidence.EvidenceAnalysisResponse`
+- Deterministic evidence analysis pipeline:
+
+```
+Resume Skills
+      ↓
+Skill Normalization
+      ↓
+GitHub Repository Skills
+      ↓
+Evidence Matching
+      ↓
+Evidence Classification
+      ↓
+Supporting Repositories
+      ↓
+Evidence Coverage
+```
+
+- **Explainable Classification Rules**:
+  - `STRONG`: Skill detected across multiple ($\ge 2$) analyzed GitHub repositories.
+  - `MODERATE`: Skill detected in at least one ($== 1$) analyzed GitHub repository.
+  - `NONE_DETECTED`: Skill claimed in resume but not detected ($== 0$) across analyzed repositories.
+- **Repository Evidence Preservation**: Tracks supporting repositories with repository name, full name, URL, and detected technologies.
+- **Explainable Principle**: Missing GitHub evidence does NOT imply a candidate lacks knowledge or fabricated a claim; evidence reflects only verified public repository presence.
+- **Error Handling**: Distinguishes GitHub API failures (HTTP 404, 403, 502, 504) from undetected skills, returning clear API errors rather than misleading `NONE_DETECTED` outputs.

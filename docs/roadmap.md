@@ -23,13 +23,16 @@
   - Deterministic plain-text resume parser with section detection (Summary, Skills, Education, Experience, Projects, Certifications, Achievements).
   - Skill extraction and canonical normalization reusing the technology catalog.
   - Structured API endpoint `POST /api/v1/resume/analyze`.
-  - *(Note: Resume-vs-Code Evidence Analysis and LLM-based parsing will be implemented in subsequent milestones).*
+- [x] **Milestone 8: Resume vs GitHub Evidence Analysis (Deterministic Foundation)**
+  - Deterministic comparison between resume claims and verified public GitHub repository signals.
+  - Multi-tiered explainable classification: `STRONG`, `MODERATE`, and `NONE_DETECTED`.
+  - Preservation of supporting repository metadata and deterministic coverage calculation.
+  - Dedicated API endpoint `POST /api/v1/evidence/analyze`.
+  - *(Note: Absence of GitHub evidence reflects repository presence only and does NOT indicate false claims; AI/LLM intelligence layer will be added in future milestones).*
 
 ---
 
 ### Future Milestones (Not Yet Implemented)
-- [ ] **Milestone 8: Resume Skill Profile & GitHub Evidence Comparison**
-  - Synthesize resume skill profile and compare claims against verified GitHub repository evidence.
 - [ ] **Milestone 9: Persistence & Database Modeling**
   - PostgreSQL schema design for developer profiles, repositories, roles, and learning roadmaps.
   - Database migrations and connection pooling.
