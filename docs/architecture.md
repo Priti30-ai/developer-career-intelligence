@@ -158,3 +158,42 @@ Deterministic Match Coverage Percentage
 - **Current Limitations & Future Enhancements**:
   - Current baseline relies on deterministic alias and keyword matching.
   - Future milestones will evaluate semantic matching and vector embeddings (`pgvector`) to capture conceptual equivalents not present in alias catalogs.
+
+### 9. Unified Developer Profile Synthesis (Deterministic Foundation)
+- **Service**: `app.services.developer_profile_service.DeveloperProfileService`
+- **Schemas**: `app.schemas.developer_profile.DeveloperProfileRequest`, `app.schemas.developer_profile.DeveloperProfileResponse`
+- Deterministic synthesis pipeline:
+
+```
+GitHub Analysis
+       +
+Resume Analysis
+       +
+Evidence Analysis
+       ↓
+Unified Developer Profile
+```
+
+- **Unified Developer-Level Representation**:
+  - Serves as the central, reusable developer-level profile consumed by downstream intelligence modules (Job Description Matching, Skill Gap Analysis, Career Recommendations, Roadmap, and Frontend UI).
+- **Skill Merging & Deduplication**:
+  - Combines repository-derived skills with resume-extracted skills into canonical normalized forms using `TechnologyService`.
+  - Removes duplicate alias variations (`python`, `Python` $\to$ `Python`).
+- **Source Tracking**:
+  - Unambiguously records whether each skill was identified from `github`, `resume`, or both (`["github", "resume"]`).
+- **Evidence Classification & Preservation**:
+  - Preserves verified repository evidence classifications:
+    - `STRONG`: Detected across $\ge 2$ analyzed repositories.
+    - `MODERATE`: Detected in $1$ analyzed repository.
+    - `NONE_DETECTED`: Claimed in resume but not detected across analyzed repositories.
+  - Attaches matching repository metadata (`name`, `full_name`, `html_url`, `skills_detected`).
+  - **Critical Semantics**: Missing GitHub evidence (`NONE_DETECTED`) indicates solely the absence of verified public repository evidence; it does NOT mean or prove that the candidate lacks the skill.
+- **Deterministic Profile Statistics & Invariants**:
+  - Computes `total_skills`, `github_skill_count`, `resume_skill_count`, `skills_from_both_sources`, `supported_skill_count`, and `skills_without_github_evidence`.
+  - Invariants hold strictly:
+    $$\text{total\_skills} \equiv \text{supported\_skill\_count} + \text{skills\_without\_github\_evidence}$$
+    $$\text{total\_skills} \equiv \text{github\_skill\_count} + \text{resume\_skill\_count} - \text{skills\_from\_both\_sources}$$
+- **Downstream Module Adapter**:
+  - Exposes `profile.get_skill_names()` and `extract_developer_skills(profile)` for zero-copy, direct integration into `job_matching_service.match_job_description`.
+- **API Endpoint**:
+  - `POST /api/v1/developer-profile/analyze`

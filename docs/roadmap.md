@@ -34,18 +34,24 @@
   - Comparison of job description required skills against developer skills with matched/missing breakdown.
   - Dedicated API endpoint `POST /api/v1/job-matching/analyze`.
   - *(Note: Currently keyword/alias-based; semantic vector matching with embeddings will be added in future milestones).*
+- [x] **Milestone 10: Unified Developer Profile Synthesis (Deterministic Foundation)**
+  - Deterministic synthesis combining GitHub repository analysis, technology extraction, resume parsing, and verified evidence.
+  - Tracking of skill origin sources (`github`, `resume`, or both) and preservation of evidence levels (`STRONG`, `MODERATE`, `NONE_DETECTED`).
+  - Strict preservation of resume claims without treating missing GitHub evidence as lack of skill.
+  - Clean downstream adapter for Job Description Matching and Skill Gap integration.
+  - Dedicated API endpoint `POST /api/v1/developer-profile/analyze`.
 
 ---
 
 ### Future Milestones (Not Yet Implemented)
-- [ ] **Milestone 10: Persistence & Database Modeling**
+- [ ] **Milestone 11: Persistence & Database Modeling**
   - PostgreSQL schema design for developer profiles, repositories, roles, and learning roadmaps.
   - Database migrations and connection pooling.
-- [ ] **Milestone 11: Semantic & Vector Matching**
+- [ ] **Milestone 12: Semantic & Vector Matching**
   - Embeddings (pgvector) for fuzzy skill matching and non-exact role similarities.
-- [ ] **Milestone 12: Authentication & Profile Management**
+- [ ] **Milestone 13: Authentication & Profile Management**
   - User authentication, OAuth GitHub login, and private dashboard access.
-- [ ] **Milestone 13: AI & Agentic Career Mentorship**
+- [ ] **Milestone 14: AI & Agentic Career Mentorship**
   - RAG-powered career advisory agents and personalized resume insights.
-- [ ] **Milestone 14: Frontend Application**
+- [ ] **Milestone 15: Frontend Application**
   - Modern web dashboard for developer skill visualization, gap exploration, and interactive roadmaps.
