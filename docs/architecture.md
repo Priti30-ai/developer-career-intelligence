@@ -197,3 +197,41 @@ Unified Developer Profile
   - Exposes `profile.get_skill_names()` and `extract_developer_skills(profile)` for zero-copy, direct integration into `job_matching_service.match_job_description`.
 - **API Endpoint**:
   - `POST /api/v1/developer-profile/analyze`
+
+### 10. Repository Architecture Analysis (Deterministic Foundation)
+- **Service**: `app.services.repository_architecture_service.RepositoryArchitectureService`
+- **Schemas**: `app.schemas.repository_architecture.RepositoryArchitectureRequest`, `app.schemas.repository_architecture.RepositoryArchitectureResponse`
+- Deterministic repository architecture analysis pipeline:
+
+```
+GitHub Repository
+       ↓
+Repository Tree
+       ↓
+Structural Signals
+       ↓
+Project Type Detection
+       ↓
+Repository Architecture
+```
+
+- **Analysis Scope**:
+  - Examines file/directory trees, dependency manifests, build configurations, and metadata from public GitHub repositories.
+  - Recursively retrieves repository tree via `GitHubService.get_repository_tree(owner, repo, branch)`.
+- **Concrete Architecture Signals**:
+  - `FRONTEND`: Triggered by frontend directories (`frontend/`, `src/components/`, etc.) and manifests (`vite.config.*`, `package.json`).
+  - `BACKEND`: Triggered by backend structures (`backend/`, `api/`, `routes/`, `services/`, `requirements.txt`).
+  - `DATABASE`: Triggered strictly by concrete persistence files (`migrations/`, `schema.prisma`, `*.sql`, `alembic/`).
+  - `DEVOPS`: Triggered by `Dockerfile`, `docker-compose.yml`, `.github/workflows/`, and infrastructure configs.
+  - `DATA_SCIENCE` / `MACHINE_LEARNING`: Triggered by `.ipynb`, `notebooks/`, datasets, model weights (`.pt`, `.onnx`), and training pipelines.
+  - `CLI`: Triggered by command-line directories (`cli/`, `bin/`, `cmd/`, `cli.py`).
+  - `TESTING`: Triggered by test suites (`tests/`, `test/`, `__tests__/`).
+  - `DOCUMENTATION`: Triggered by `README.md`, `docs/`, `CONTRIBUTING.md`, and license files.
+- **Strict Evidence Semantics**:
+  - Does NOT confuse directory existence with technology confirmation. For example, a `models/` directory alone produces a structural `MODELS` signal, rather than an unsupported claim of "PostgreSQL database detected".
+- **Deterministic Project Classification**:
+  - Categorizes repository into `FULL_STACK`, `FRONTEND`, `BACKEND`, `DATA_SCIENCE`, `MACHINE_LEARNING`, `CLI`, `LIBRARY`, or `UNKNOWN`.
+- **Current Limitations**:
+  - This milestone performs repository-level structural analysis. It does not yet inspect source-code AST syntax or semantics (reserved for a future milestone).
+- **API Endpoint**:
+  - `POST /api/v1/repository-architecture/analyze`

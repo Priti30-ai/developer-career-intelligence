@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import httpx
 
 
@@ -9,6 +9,11 @@ class GitHubServiceError(Exception):
 
 class GitHubUserNotFoundError(GitHubServiceError):
     """Raised when the requested GitHub user is not found."""
+    pass
+
+
+class GitHubRepositoryNotFoundError(GitHubServiceError):
+    """Raised when the requested GitHub repository is not found."""
     pass
 
 
@@ -135,6 +140,124 @@ class GitHubService:
 
         if response.status_code == 404:
             raise GitHubUserNotFoundError(f"GitHub user '{clean_username}' not found")
+
+        if response.status_code == 403:
+            raise GitHubAPIError("GitHub API rate limit exceeded or access forbidden", status_code=403)
+
+        raise GitHubAPIError(
+            f"GitHub API returned error status: {response.status_code}",
+            status_code=response.status_code if response.status_code < 500 else 502,
+        )
+
+    async def get_repository_details(self, owner: str, repo: str) -> Dict[str, Any]:
+        """
+        Fetch public repository metadata for a given owner and repository name.
+
+        Args:
+            owner: Repository owner/organization.
+            repo: Repository name.
+
+        Returns:
+            Dict containing repository details.
+
+        Raises:
+            GitHubRepositoryNotFoundError: When repository is not found (HTTP 404).
+            GitHubAPIError: When GitHub API request fails or rate limit exceeded.
+        """
+        clean_owner = owner.strip()
+        clean_repo = repo.strip()
+        url = f"{self.BASE_URL}/repos/{clean_owner}/{clean_repo}"
+
+        try:
+            async with httpx.AsyncClient(timeout=self.TIMEOUT) as client:
+                response = await client.get(url, headers=self.HEADERS)
+        except httpx.TimeoutException as exc:
+            raise GitHubAPIError("GitHub API request timed out", status_code=504) from exc
+        except httpx.RequestError as exc:
+            raise GitHubAPIError("Failed to connect to GitHub API", status_code=502) from exc
+        except Exception as exc:
+            raise GitHubAPIError(f"Unexpected error communicating with GitHub: {str(exc)}", status_code=500) from exc
+
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "name": data.get("name") or clean_repo,
+                "full_name": data.get("full_name") or f"{clean_owner}/{clean_repo}",
+                "html_url": data.get("html_url") or f"https://github.com/{clean_owner}/{clean_repo}",
+                "description": data.get("description"),
+                "language": data.get("language"),
+                "topics": data.get("topics", []),
+                "default_branch": data.get("default_branch", "main"),
+                "fork": data.get("fork", False),
+                "stargazers_count": data.get("stargazers_count", 0),
+                "forks_count": data.get("forks_count", 0),
+            }
+
+        if response.status_code == 404:
+            raise GitHubRepositoryNotFoundError(f"GitHub repository '{clean_owner}/{clean_repo}' not found")
+
+        if response.status_code == 403:
+            raise GitHubAPIError("GitHub API rate limit exceeded or access forbidden", status_code=403)
+
+        raise GitHubAPIError(
+            f"GitHub API returned error status: {response.status_code}",
+            status_code=response.status_code if response.status_code < 500 else 502,
+        )
+
+    async def get_repository_tree(
+        self, owner: str, repo: str, branch: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Fetch the recursive file and directory tree of a GitHub repository.
+
+        Args:
+            owner: Repository owner/organization.
+            repo: Repository name.
+            branch: Optional branch name or commit SHA (defaults to 'HEAD').
+
+        Returns:
+            List of dicts representing tree items with 'path', 'type' ('blob' or 'tree'), and 'size'.
+
+        Raises:
+            GitHubRepositoryNotFoundError: When repository or branch is not found (HTTP 404).
+            GitHubAPIError: When GitHub API request fails or rate limit exceeded.
+        """
+        clean_owner = owner.strip()
+        clean_repo = repo.strip()
+        target_branch = branch.strip() if branch and branch.strip() else "HEAD"
+        url = f"{self.BASE_URL}/repos/{clean_owner}/{clean_repo}/git/trees/{target_branch}?recursive=1"
+
+        try:
+            async with httpx.AsyncClient(timeout=self.TIMEOUT) as client:
+                response = await client.get(url, headers=self.HEADERS)
+        except httpx.TimeoutException as exc:
+            raise GitHubAPIError("GitHub API request timed out", status_code=504) from exc
+        except httpx.RequestError as exc:
+            raise GitHubAPIError("Failed to connect to GitHub API", status_code=502) from exc
+        except Exception as exc:
+            raise GitHubAPIError(f"Unexpected error communicating with GitHub: {str(exc)}", status_code=500) from exc
+
+        if response.status_code == 200:
+            data = response.json()
+            raw_tree = data.get("tree", [])
+            return [
+                {
+                    "path": item.get("path"),
+                    "type": item.get("type", "blob"),
+                    "size": item.get("size"),
+                }
+                for item in raw_tree
+                if item.get("path")
+            ]
+
+        # 409 Conflict occurs if the repository is completely empty (no commits)
+        if response.status_code == 409:
+            return []
+
+        if response.status_code == 404:
+            raise GitHubRepositoryNotFoundError(
+                f"GitHub repository '{clean_owner}/{clean_repo}' (or branch '{target_branch}') not found"
+            )
 
         if response.status_code == 403:
             raise GitHubAPIError("GitHub API rate limit exceeded or access forbidden", status_code=403)

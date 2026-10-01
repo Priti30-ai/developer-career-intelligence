@@ -40,18 +40,26 @@
   - Strict preservation of resume claims without treating missing GitHub evidence as lack of skill.
   - Clean downstream adapter for Job Description Matching and Skill Gap integration.
   - Dedicated API endpoint `POST /api/v1/developer-profile/analyze`.
+- [x] **Milestone 11: Repository Architecture Analysis (Deterministic Foundation)**
+  - Deterministic repository tree parsing, configuration manifest detection, and architectural directory classification.
+  - Structured architecture signals (Frontend, Backend, Database, DevOps, Data Science, Machine Learning, CLI, Testing, Documentation).
+  - Deterministic project classification (`FULL_STACK`, `FRONTEND`, `BACKEND`, `DATA_SCIENCE`, `MACHINE_LEARNING`, `CLI`, `LIBRARY`, `UNKNOWN`).
+  - Dedicated API endpoint `POST /api/v1/repository-architecture/analyze`.
+  - *(Note: Currently repository-level structural analysis; AST / Tree-sitter based source-code analysis is a future milestone).*
 
 ---
 
 ### Future Milestones (Not Yet Implemented)
-- [ ] **Milestone 11: Persistence & Database Modeling**
+- [ ] **Milestone 12: Source-Code Syntax & AST Analysis**
+  - AST / Tree-sitter parsing for source-code syntax, function signatures, dependencies, and code metrics.
+- [ ] **Milestone 13: Persistence & Database Modeling**
   - PostgreSQL schema design for developer profiles, repositories, roles, and learning roadmaps.
   - Database migrations and connection pooling.
-- [ ] **Milestone 12: Semantic & Vector Matching**
+- [ ] **Milestone 14: Semantic & Vector Matching**
   - Embeddings (pgvector) for fuzzy skill matching and non-exact role similarities.
-- [ ] **Milestone 13: Authentication & Profile Management**
+- [ ] **Milestone 15: Authentication & Profile Management**
   - User authentication, OAuth GitHub login, and private dashboard access.
-- [ ] **Milestone 14: AI & Agentic Career Mentorship**
+- [ ] **Milestone 16: AI & Agentic Career Mentorship**
   - RAG-powered career advisory agents and personalized resume insights.
-- [ ] **Milestone 15: Frontend Application**
+- [ ] **Milestone 17: Frontend Application**
   - Modern web dashboard for developer skill visualization, gap exploration, and interactive roadmaps.
