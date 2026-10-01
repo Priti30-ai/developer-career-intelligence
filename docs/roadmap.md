@@ -29,18 +29,23 @@
   - Preservation of supporting repository metadata and deterministic coverage calculation.
   - Dedicated API endpoint `POST /api/v1/evidence/analyze`.
   - *(Note: Absence of GitHub evidence reflects repository presence only and does NOT indicate false claims; AI/LLM intelligence layer will be added in future milestones).*
+- [x] **Milestone 9: Job Description Analysis & Matching (Deterministic Foundation)**
+  - Deterministic skill extraction and canonical alias normalization from raw job description text.
+  - Comparison of job description required skills against developer skills with matched/missing breakdown.
+  - Dedicated API endpoint `POST /api/v1/job-matching/analyze`.
+  - *(Note: Currently keyword/alias-based; semantic vector matching with embeddings will be added in future milestones).*
 
 ---
 
 ### Future Milestones (Not Yet Implemented)
-- [ ] **Milestone 9: Persistence & Database Modeling**
+- [ ] **Milestone 10: Persistence & Database Modeling**
   - PostgreSQL schema design for developer profiles, repositories, roles, and learning roadmaps.
   - Database migrations and connection pooling.
-- [ ] **Milestone 10: Semantic & Vector Matching**
+- [ ] **Milestone 11: Semantic & Vector Matching**
   - Embeddings (pgvector) for fuzzy skill matching and non-exact role similarities.
-- [ ] **Milestone 11: Authentication & Profile Management**
+- [ ] **Milestone 12: Authentication & Profile Management**
   - User authentication, OAuth GitHub login, and private dashboard access.
-- [ ] **Milestone 12: AI & Agentic Career Mentorship**
+- [ ] **Milestone 13: AI & Agentic Career Mentorship**
   - RAG-powered career advisory agents and personalized resume insights.
-- [ ] **Milestone 13: Frontend Application**
+- [ ] **Milestone 14: Frontend Application**
   - Modern web dashboard for developer skill visualization, gap exploration, and interactive roadmaps.

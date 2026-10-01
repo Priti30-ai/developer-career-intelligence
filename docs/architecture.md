@@ -128,3 +128,33 @@ Evidence Coverage
 - **Repository Evidence Preservation**: Tracks supporting repositories with repository name, full name, URL, and detected technologies.
 - **Explainable Principle**: Missing GitHub evidence does NOT imply a candidate lacks knowledge or fabricated a claim; evidence reflects only verified public repository presence.
 - **Error Handling**: Distinguishes GitHub API failures (HTTP 404, 403, 502, 504) from undetected skills, returning clear API errors rather than misleading `NONE_DETECTED` outputs.
+
+### 8. Job Description Analysis & Matching (Deterministic Foundation)
+- **Services**: `app.services.job_description_service.JobDescriptionService`, `app.services.job_matching_service.JobMatchingService`
+- **Schemas**: `app.schemas.job_matching.JobMatchingRequest`, `app.schemas.job_matching.JobMatchingResponse`
+- Deterministic analysis & matching pipeline:
+
+```
+Job Description Text
+        ↓
+Skill Extraction (Word-Boundary & Alias Scanning)
+        ↓
+Canonical Normalization (TechnologyService)
+        ↓
+Developer Skills Comparison
+        ↓
+Matched vs Missing Skills Partition
+        ↓
+Deterministic Match Coverage Percentage
+```
+
+- **Skill Extraction & Normalization**:
+  - Reuses the centralized `TECHNOLOGY_ALIASES` mapping and `normalize_technology_name` utility.
+  - Employs regex word-boundary detection to avoid substring false positives.
+  - Normalizes aliases (`nodejs` $\to$ `Node.js`, `cpp` $\to$ `C++`, `sklearn` $\to$ `Scikit-learn`) and eliminates duplicates.
+- **Deterministic Match Metric**:
+  $$\text{match\_percentage} = \text{round}\left(\frac{\text{matched\_skill\_count}}{\text{total\_required\_skills}} \times 100, 2\right) \quad (\text{returns } 0.0 \text{ if } \text{total\_required\_skills} = 0)$$
+  *(Partition invariant: $\text{matched\_skill\_count} + \text{missing\_skill\_count} \equiv \text{total\_required\_skills}$)*
+- **Current Limitations & Future Enhancements**:
+  - Current baseline relies on deterministic alias and keyword matching.
+  - Future milestones will evaluate semantic matching and vector embeddings (`pgvector`) to capture conceptual equivalents not present in alias catalogs.
