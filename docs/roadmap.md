@@ -14,23 +14,30 @@
 - [x] **Milestone 5: Skill Gap Analysis**
   - Centralized career role definitions for 6 core industry profiles.
   - Deterministic skill-coverage calculation and matched/missing partitioning.
-- [x] **Milestone 6: Career Recommendations & Learning Roadmap (Current Milestone)**
+- [x] **Milestone 6: Career Recommendations & Learning Roadmap**
   - Centralized learning guidance catalog for prerequisite technical skills.
   - Explainable priority assignment (`HIGH`, `MEDIUM`, `LOW`) based on dependency unblocking.
   - Multi-stage sequential learning roadmaps respecting topological prerequisites.
   - Suggested career-system-relevant portfolio projects.
+- [x] **Milestone 7: Resume Analysis (Deterministic Foundation)**
+  - Deterministic plain-text resume parser with section detection (Summary, Skills, Education, Experience, Projects, Certifications, Achievements).
+  - Skill extraction and canonical normalization reusing the technology catalog.
+  - Structured API endpoint `POST /api/v1/resume/analyze`.
+  - *(Note: Resume-vs-Code Evidence Analysis and LLM-based parsing will be implemented in subsequent milestones).*
 
 ---
 
 ### Future Milestones (Not Yet Implemented)
-- [ ] **Milestone 7: Persistence & Database Modeling**
+- [ ] **Milestone 8: Resume Skill Profile & GitHub Evidence Comparison**
+  - Synthesize resume skill profile and compare claims against verified GitHub repository evidence.
+- [ ] **Milestone 9: Persistence & Database Modeling**
   - PostgreSQL schema design for developer profiles, repositories, roles, and learning roadmaps.
   - Database migrations and connection pooling.
-- [ ] **Milestone 8: Semantic & Vector Matching**
+- [ ] **Milestone 10: Semantic & Vector Matching**
   - Embeddings (pgvector) for fuzzy skill matching and non-exact role similarities.
-- [ ] **Milestone 9: Authentication & Profile Management**
+- [ ] **Milestone 11: Authentication & Profile Management**
   - User authentication, OAuth GitHub login, and private dashboard access.
-- [ ] **Milestone 10: AI & Agentic Career Mentorship**
+- [ ] **Milestone 12: AI & Agentic Career Mentorship**
   - RAG-powered career advisory agents and personalized resume insights.
-- [ ] **Milestone 11: Frontend Application**
+- [ ] **Milestone 13: Frontend Application**
   - Modern web dashboard for developer skill visualization, gap exploration, and interactive roadmaps.

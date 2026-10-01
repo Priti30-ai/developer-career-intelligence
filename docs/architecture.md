@@ -78,3 +78,25 @@ Multi-Stage Sequential Learning Roadmap
   - Core curriculum topics and career-system-related suggested portfolio projects.
   - Sequential, non-empty learning roadmap stages ordered topologically according to prerequisites.
 - Disclaimer: Recommendations represent structured skill guidance and do not guarantee employment or hiring outcomes.
+
+### 6. Resume Analysis (Deterministic Foundation)
+- **Service**: `app.services.resume_service.ResumeService`
+- **Schema**: `app.schemas.resume.ResumeAnalysisRequest`, `app.schemas.resume.ResumeAnalysisResponse`
+- Deterministic parsing pipeline:
+
+```
+Resume Text
+    ↓
+Resume Service
+    ↓
+Section Detection
+    ↓
+Structured Resume Data
+    ↓
+Normalized Skills
+```
+
+- Converts unstructured plain text resumes into structured sections: Summary, Skills, Education, Experience, Projects, Certifications, and Achievements.
+- Normalizes extracted skills using `normalize_technology_name` from the shared technology service, ensuring alias canonicalization and deduplication.
+- Extracts structured education credentials, work experience/internships, and projects with associated technologies.
+- *(Note: Resume Skill Profile and Resume-vs-Code Evidence Analysis will be integrated in subsequent milestones).*
