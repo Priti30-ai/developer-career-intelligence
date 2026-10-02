@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import GitHubAnalysis from './pages/GitHubAnalysis';
+import ResumeAnalysis from './pages/ResumeAnalysis';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -151,23 +152,7 @@ function App() {
           />
 
           {/* Documents Routes */}
-          <Route
-            path={APP_ROUTES.RESUME}
-            element={
-              <ModulePlaceholder
-                moduleName="Resume Analysis"
-                group="Documents"
-                description={getItemConfig(APP_ROUTES.RESUME).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.RESUME).apiEndpoint}
-                plannedCapabilities={[
-                  'PDF / DOCX document parsing and section classification',
-                  'Claim extraction and semantic entity tagging',
-                  'Cross-referencing claims against GitHub repository evidence',
-                  'Discrepancy detection and claim verification scorecard'
-                ]}
-              />
-            }
-          />
+          <Route path={APP_ROUTES.RESUME} element={<ResumeAnalysis />} />
 
           {/* Catch-all fallback */}
           <Route path="*" element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />

@@ -18,6 +18,7 @@ Tests:
 12. API response structure and contract
 """
 
+import io
 import sys
 import unittest
 from pathlib import Path
@@ -26,12 +27,45 @@ from pathlib import Path
 backend_dir = Path(__file__).resolve().parent.parent / "backend"
 sys.path.insert(0, str(backend_dir))
 
+import docx
+import pymupdf
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.main import app
 from app.schemas.resume import ResumeAnalysisRequest
+from app.services.document_extraction_service import (
+    DocumentExtractionError,
+    DocumentExtractionService,
+    EmptyFileError,
+    FileTooLargeError,
+    NoTextExtractedError,
+    UnsupportedFormatError,
+    document_extraction_service,
+)
 from app.services.resume_service import resume_service
+
+
+def _generate_test_pdf(text: str = "") -> bytes:
+    """Helper to generate an in-memory test PDF."""
+    doc = pymupdf.open()
+    page = doc.new_page()
+    if text:
+        page.insert_text((50, 72), text)
+    pdf_bytes = doc.tobytes()
+    doc.close()
+    return pdf_bytes
+
+
+def _generate_test_docx(text: str = "") -> bytes:
+    """Helper to generate an in-memory test DOCX."""
+    doc = docx.Document()
+    if text:
+        for line in text.split("\n"):
+            doc.add_paragraph(line)
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
 
 
 SAMPLE_RESUME = """SUMMARY
@@ -292,6 +326,171 @@ Developed automated data processing pipelines using Pandas.
         self.assertEqual(data["project_count"], len(data["projects"]))
         self.assertEqual(data["experience_count"], len(data["experience"]))
 
+    def test_13_pdf_upload_valid(self):
+        """Test 13: Valid text-based PDF document is extracted and parsed into structured data."""
+        pdf_bytes = _generate_test_pdf(SAMPLE_RESUME)
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("resume.pdf", pdf_bytes, "application/pdf")},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("Python", data["skills"])
+        self.assertGreater(data["skill_count"], 0)
+        self.assertGreater(data["project_count"], 0)
+        self.assertGreater(len(data["education"]), 0)
+
+    def test_14_pdf_upload_no_text(self):
+        """Test 14: PDF with no extractable text returns HTTP 400 with clear message."""
+        empty_pdf_bytes = _generate_test_pdf("")
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("scanned.pdf", empty_pdf_bytes, "application/pdf")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Could not extract text from this PDF", response.json()["detail"])
+
+    def test_15_pdf_upload_corrupted(self):
+        """Test 15: Corrupted PDF bytes return HTTP 400 with corruption message."""
+        corrupted_bytes = b"%PDF-1.4\ncorrupted garbage binary data not a valid trailer"
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("broken.pdf", corrupted_bytes, "application/pdf")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("corrupted or invalid", response.json()["detail"].lower())
+
+    def test_16_docx_upload_valid(self):
+        """Test 16: Valid DOCX document is extracted and parsed into structured data."""
+        docx_bytes = _generate_test_docx(SAMPLE_RESUME)
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={
+                "file": (
+                    "candidate_resume.docx",
+                    docx_bytes,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("Python", data["skills"])
+        self.assertGreater(data["skill_count"], 0)
+        self.assertEqual(data["project_count"], 1)
+
+    def test_17_docx_upload_empty(self):
+        """Test 17: Empty DOCX document returns HTTP 400."""
+        empty_docx_bytes = _generate_test_docx("")
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={
+                "file": (
+                    "empty.docx",
+                    empty_docx_bytes,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("empty", response.json()["detail"].lower())
+
+    def test_18_docx_upload_corrupted(self):
+        """Test 18: Corrupted DOCX file returns HTTP 400."""
+        corrupted_docx_bytes = b"PK\x03\x04not a valid zip package content"
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={
+                "file": (
+                    "corrupt.docx",
+                    corrupted_docx_bytes,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("corrupted or invalid", response.json()["detail"].lower())
+
+    def test_19_txt_upload_valid(self):
+        """Test 19: Valid UTF-8 TXT document upload is extracted and parsed."""
+        txt_bytes = SAMPLE_RESUME.encode("utf-8")
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("resume.txt", txt_bytes, "text/plain")},
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("Python", data["skills"])
+        self.assertEqual(data["skill_count"], 6)
+
+    def test_20_txt_upload_invalid_utf8(self):
+        """Test 20: Non-UTF-8 binary content uploaded as .txt returns HTTP 400."""
+        invalid_bytes = b"\x80\x81\x82\x90\x91\xff\xfe\xfa"
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("invalid.txt", invalid_bytes, "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("utf-8", response.json()["detail"].lower())
+
+    def test_21_unsupported_file_type(self):
+        """Test 21: Unsupported file formats (e.g., .png, .exe) return HTTP 400."""
+        png_bytes = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("resume_screenshot.png", png_bytes, "image/png")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Unsupported resume format", response.json()["detail"])
+
+    def test_22_empty_file_upload(self):
+        """Test 22: 0-byte file upload returns HTTP 400."""
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("empty.txt", b"", "text/plain")},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("empty", response.json()["detail"].lower())
+
+    def test_23_oversized_file_upload(self):
+        """Test 23: File exceeding 5 MB limit returns HTTP 413."""
+        # 5 MB + 100 bytes
+        oversized_bytes = b"X" * (5 * 1024 * 1024 + 100)
+        response = self.client.post(
+            "/api/v1/resume/analyze",
+            files={"file": ("large.txt", oversized_bytes, "text/plain")},
+        )
+        self.assertEqual(response.status_code, 413)
+        self.assertIn("5 MB limit", response.json()["detail"])
+
+    def test_24_missing_file_and_body(self):
+        """Test 24: Request with neither file nor JSON body returns HTTP 400."""
+        response = self.client.post("/api/v1/resume/analyze", data={})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("No resume file was uploaded", response.json()["detail"])
+
+    def test_25_document_extraction_service_unit(self):
+        """Test 25: Direct unit tests on DocumentExtractionService methods and validation."""
+        service = DocumentExtractionService()
+
+        # Format validation
+        self.assertEqual(service.validate_file_metadata("test.pdf"), "pdf")
+        self.assertEqual(service.validate_file_metadata("test.docx"), "docx")
+        self.assertEqual(service.validate_file_metadata("test.txt"), "txt")
+
+        # Unsupported
+        with self.assertRaises(UnsupportedFormatError):
+            service.validate_file_metadata("test.jpg")
+
+        # Empty
+        with self.assertRaises(EmptyFileError):
+            service.extract_text(b"", "test.txt")
+
+        # Oversized
+        with self.assertRaises(FileTooLargeError):
+            service.extract_text(b"A" * (6 * 1024 * 1024), "test.txt")
+
 
 if __name__ == "__main__":
     unittest.main()
+

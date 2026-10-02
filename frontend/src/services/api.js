@@ -11,9 +11,13 @@ export const apiClient = axios.create({
   timeout: 30000,
 });
 
-// Request interceptor for logging or authorization tokens
+// Request interceptor for logging, authorization, and multipart handling
 apiClient.interceptors.request.use(
   (config) => {
+    // If payload is FormData, remove default Content-Type so the browser sets multipart boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => {
@@ -27,13 +31,19 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Standardized error message extraction
-    const message =
-      error.response?.data?.detail ||
-      error.response?.data?.message ||
-      error.message ||
-      'An unexpected error occurred while contacting the server.';
-    
+    const detail = error.response?.data?.detail;
+    let message = 'An unexpected error occurred while contacting the server.';
+
+    if (typeof detail === 'string') {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      message = detail.map((d) => d.msg || JSON.stringify(d)).join('; ');
+    } else if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.message) {
+      message = error.message;
+    }
+
     return Promise.reject(new Error(message));
   }
 );
