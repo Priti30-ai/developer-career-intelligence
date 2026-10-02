@@ -54,8 +54,8 @@ export const NAVIGATION_CONFIG = [
         path: APP_ROUTES.GITHUB,
         icon: 'GitBranch',
         description: 'Repository commit histories, code velocity, language distribution, and pull request activity.',
-        apiEndpoint: '/api/v1/developer-profile',
-        status: 'in-progress',
+        apiEndpoint: '/api/github/{username}',
+        status: 'active',
       },
       {
         name: 'Skill Profile',

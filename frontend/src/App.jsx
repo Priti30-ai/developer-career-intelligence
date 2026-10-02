@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import ModulePlaceholder from './pages/ModulePlaceholder';
+import GitHubAnalysis from './pages/GitHubAnalysis';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -26,23 +27,7 @@ function App() {
           <Route path={APP_ROUTES.DASHBOARD} element={<Dashboard />} />
 
           {/* Developer Analysis Routes */}
-          <Route
-            path={APP_ROUTES.GITHUB}
-            element={
-              <ModulePlaceholder
-                moduleName="GitHub Analysis"
-                group="Developer Analysis"
-                description={getItemConfig(APP_ROUTES.GITHUB).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.GITHUB).apiEndpoint}
-                plannedCapabilities={[
-                  'Repository branch activity & commit frequency analytics',
-                  'Programming language distribution and ecosystem breakdown',
-                  'Pull request reviews, collaboration cadence, and velocity signals',
-                  'Public vs private profile contribution verification'
-                ]}
-              />
-            }
-          />
+          <Route path={APP_ROUTES.GITHUB} element={<GitHubAnalysis />} />
           <Route
             path={APP_ROUTES.SKILLS}
             element={
