@@ -11,7 +11,7 @@ PROGRAMMING_LANGUAGES: Set[str] = {
     "Go", "Rust", "PHP", "Ruby", "Kotlin", "Swift", "Dart", "R",
     "Scala", "Haskell", "Lua", "Perl", "Shell", "Bash", "PowerShell",
     "Objective-C", "MATLAB", "Groovy", "Elixir", "Erlang", "Clojure",
-    "F#", "HTML", "CSS", "SQL",
+    "F#", "SQL",
 }
 
 FRAMEWORKS_AND_LIBRARIES: Set[str] = {
@@ -22,6 +22,7 @@ FRAMEWORKS_AND_LIBRARIES: Set[str] = {
     "Bootstrap", "Tailwind CSS", "Redux", "Svelte", "Nuxt.js",
     "TensorFlow", "TensorFlow.js", "PyTorch", "Keras", "Scikit-learn", "Pandas",
     "NumPy", "OpenCV", "Hugging Face", "LangChain", "Prisma", "SQLAlchemy",
+    "Hibernate",
 }
 
 AI_MACHINE_LEARNING: Set[str] = {
@@ -52,6 +53,10 @@ DEVOPS_AND_CLOUD: Set[str] = {
     "Cargo", "Maven", "Gradle",
 }
 
+TESTING_AND_QA: Set[str] = {
+    "JUnit", "Pytest", "Jest", "Mocha",
+}
+
 # Ordered list of (category_name, category_set) used for classification.
 # The order controls which categories appear first in the response.
 CATEGORY_DEFINITIONS: List[tuple] = [
@@ -61,6 +66,7 @@ CATEGORY_DEFINITIONS: List[tuple] = [
     ("Web Technologies", WEB_TECHNOLOGIES),
     ("Databases", DATABASES),
     ("DevOps & Cloud", DEVOPS_AND_CLOUD),
+    ("Testing & QA", TESTING_AND_QA),
 ]
 
 FALLBACK_CATEGORY = "Tools & Other"
