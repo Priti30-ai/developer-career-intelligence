@@ -43,6 +43,26 @@ class JobMatchingRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
 
+class JobMatchSkillDetail(BaseModel):
+    name: str = Field(..., description="Canonical skill name")
+    categories: List[str] = Field(default_factory=list, description="Taxonomy categories")
+    sources: List[str] = Field(default_factory=list, description="Provenance sources (e.g. 'github', 'resume')")
+    evidence_status: Optional[str] = Field(None, description="Grounding evidence status ('STRONG', 'MODERATE', 'NONE_DETECTED')")
+    supporting_repositories: List[str] = Field(default_factory=list, description="Names of supporting GitHub repositories")
+
+    model_config = ConfigDict(extra="ignore")
+
+
+class JobMatchCategoryBreakdown(BaseModel):
+    category: str = Field(..., description="Skill taxonomy category name")
+    required_count: int = Field(..., description="Number of required skills in this category")
+    matched_count: int = Field(..., description="Number of matched skills in this category")
+    missing_count: int = Field(..., description="Number of missing skills in this category")
+    coverage_percentage: float = Field(..., description="Percentage of required skills matched in this category")
+
+    model_config = ConfigDict(extra="ignore")
+
+
 class JobMatchingResponse(BaseModel):
     """Structured response comparing extracted JD skills against developer skills."""
 
@@ -84,6 +104,18 @@ class JobMatchingResponse(BaseModel):
     explanation: Optional[str] = Field(
         None,
         description="Deterministic explainability summary describing match breakdown",
+    )
+    matched_skill_details: List[JobMatchSkillDetail] = Field(
+        default_factory=list,
+        description="Detailed evidence and taxonomy metadata for matched skills",
+    )
+    missing_skill_details: List[JobMatchSkillDetail] = Field(
+        default_factory=list,
+        description="Detailed taxonomy metadata for missing skills",
+    )
+    category_breakdown: List[JobMatchCategoryBreakdown] = Field(
+        default_factory=list,
+        description="Category-level requirement, match, and coverage breakdown",
     )
 
     model_config = ConfigDict(extra="ignore")
