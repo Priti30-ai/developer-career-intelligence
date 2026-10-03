@@ -12,6 +12,7 @@ Converts unstructured resume text into structured developer metadata:
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+from app.services.skill_profile_service import _classify_technology
 from app.services.technology_service import (
     TECHNOLOGY_ALIASES,
     normalize_technology_name,
@@ -175,6 +176,12 @@ class ResumeService:
         certifications = self._parse_bullet_list(sections.get("certifications", []))
         achievements = self._parse_bullet_list(sections.get("achievements", []))
 
+        categorized_skills = self._build_categorized_skills(
+            skills_section_names=skills,
+            projects=projects,
+            experience=experience,
+        )
+
         return {
             "summary": summary,
             "skills": skills,
@@ -183,6 +190,7 @@ class ResumeService:
             "projects": projects,
             "certifications": certifications,
             "achievements": achievements,
+            "categorized_skills": categorized_skills,
             "skill_count": len(skills),
             "project_count": len(projects),
             "experience_count": len(experience),
@@ -478,6 +486,83 @@ class ResumeService:
                     detected.append(canonical)
 
         return detected
+
+    def _build_categorized_skills(
+        self,
+        skills_section_names: List[str],
+        projects: List[Dict[str, Any]],
+        experience: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """
+        Build categorized skill entries with source provenance tracking.
+
+        Reuses the shared taxonomy from skill_profile_service._classify_technology().
+        Each entry captures:
+          - canonical name  (already normalized by normalize_technology_name)
+          - taxonomy categories (multi-category, from CATEGORY_DEFINITIONS)
+          - resume sections where the skill was detected (source tracking)
+
+        Source labels:
+          skills_section  — explicitly listed in the SKILLS / TECHNICAL SKILLS section
+                            (or detected by the full-text multi-word scan in _parse_skills)
+          project_text    — detected via alias matching in project title/description
+          experience_text — detected via alias matching in experience description text
+
+        Deduplication:
+          One canonical entry per technology regardless of how many sections mention it.
+          If Python appears in skills + 2 projects + 1 experience entry, the result
+          is one Python entry with sources ['experience_text', 'project_text', 'skills_section'].
+
+        Ordering:
+          Entries are sorted alphabetically by name for determinism.
+          Sources within each entry are sorted alphabetically.
+
+        Args:
+            skills_section_names: Canonical names from _parse_skills() — already normalized.
+            projects: Parsed project dicts each containing a 'technologies' List[str].
+            experience: Parsed experience dicts each containing an optional 'description' str.
+
+        Returns:
+            List of dicts matching the ResumeSkill schema, sorted by name.
+        """
+        # name → set of source labels
+        skill_sources: Dict[str, Set[str]] = {}
+
+        # 1. Skills section (already normalized by _parse_skills)
+        for name in skills_section_names:
+            if name not in skill_sources:
+                skill_sources[name] = set()
+            skill_sources[name].add("skills_section")
+
+        # 2. Project technologies (already detected by _detect_technologies_in_text
+        #    inside _parse_projects — canonical names are pre-populated in each project dict)
+        for project in projects:
+            for tech in project.get("technologies", []):
+                if tech not in skill_sources:
+                    skill_sources[tech] = set()
+                skill_sources[tech].add("project_text")
+
+        # 3. Experience description technologies (deterministic alias scan)
+        for exp in experience:
+            desc = exp.get("description") or ""
+            if desc.strip():
+                for tech in self._detect_technologies_in_text(desc):
+                    if tech not in skill_sources:
+                        skill_sources[tech] = set()
+                    skill_sources[tech].add("experience_text")
+
+        # Assemble result: sorted by name for deterministic ordering
+        result: List[Dict[str, Any]] = []
+        for name in sorted(skill_sources.keys()):
+            categories = _classify_technology(name)
+            sources = sorted(skill_sources[name])  # alphabetical for determinism
+            result.append({
+                "name": name,
+                "categories": categories,
+                "sources": sources,
+            })
+
+        return result
 
     def _parse_bullet_list(self, lines: List[str]) -> List[str]:
         """Clean bulleted text lines into a list of strings."""

@@ -61,6 +61,7 @@ TECHNOLOGY_ALIASES: Dict[str, str] = {
     "tokio": "Tokio",
     "graphql": "GraphQL",
     "rest-api": "REST API",
+    "rest api": "REST API",
     "api": "API",
     "vite": "Vite",
     "axios": "Axios",

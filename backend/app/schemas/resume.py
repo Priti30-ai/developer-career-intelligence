@@ -67,13 +67,48 @@ class ResumeProject(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
 
+class ResumeSkill(BaseModel):
+    """
+    Structured resume skill with taxonomy classification and source provenance.
+
+    Introduced in Task 10.1 to align resume skill representation with the
+    GitHub-compatible taxonomy from skill_profile_service.py.
+
+    A skill may belong to multiple categories (e.g. SQL → Programming Languages
+    + Databases) and may have been detected in multiple resume sections.
+    """
+
+    name: str = Field(
+        ...,
+        description="Canonical technology name after normalization via normalize_technology_name()",
+    )
+    categories: List[str] = Field(
+        ...,
+        description=(
+            "Taxonomy categories from the shared skill_profile_service taxonomy. "
+            "A technology may appear in multiple categories. "
+            "Falls back to 'Tools & Other' if no category matches."
+        ),
+    )
+    sources: List[str] = Field(
+        ...,
+        description=(
+            "Resume sections where this skill was detected. "
+            "Possible values: 'skills_section', 'project_text', 'experience_text'. "
+            "Sorted alphabetically for determinism."
+        ),
+    )
+
+    model_config = ConfigDict(extra="ignore")
+
+
 class ResumeAnalysisResponse(BaseModel):
     """Structured resume profile extracted deterministically from resume text."""
 
     summary: Optional[str] = Field(None, description="Professional summary or career objective statement")
     skills: List[str] = Field(
         default_factory=list,
-        description="Deduplicated, normalized technical skills detected across the resume",
+        description="Deduplicated, normalized technical skills detected across the resume (backward-compatible flat list)",
     )
     education: List[ResumeEducation] = Field(
         default_factory=list,
@@ -94,6 +129,15 @@ class ResumeAnalysisResponse(BaseModel):
     achievements: List[str] = Field(
         default_factory=list,
         description="List of academic or career honors and achievements",
+    )
+    categorized_skills: List[ResumeSkill] = Field(
+        default_factory=list,
+        description=(
+            "Skills with GitHub-compatible taxonomy categories and resume section provenance. "
+            "Each entry is deduplicated; a single technology may carry multiple categories "
+            "(e.g. SQL → Programming Languages + Databases) and multiple sources "
+            "(e.g. skills_section + project_text). Sorted alphabetically by name."
+        ),
     )
     skill_count: int = Field(..., description="Total count of unique normalized skills extracted")
     project_count: int = Field(..., description="Total count of projects parsed")
