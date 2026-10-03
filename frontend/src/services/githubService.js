@@ -62,30 +62,100 @@ export const getGitHubSkills = async (username) => {
 };
 
 /**
- * Aggregator: Fetches profile, repos, technologies, and skills concurrently.
- * Rejects if any request fails so that analysis state remains atomic and consistent.
+ * Adapt unified GitHubAccountAnalysisResponse into standardized structure
+ * that preserves full raw contracts and satisfies existing dashboard components.
+ *
+ * @param {Object} data - Raw GitHubAccountAnalysisResponse from backend
+ * @returns {Object} Unified data with backward-compatible component props
  */
-export const getCompleteGitHubAnalysis = async (username) => {
-  const cleanUsername = username.trim();
-  const [profile, repos, technologies, skills] = await Promise.all([
-    getGitHubProfile(cleanUsername),
-    getGitHubRepositories(cleanUsername),
-    getGitHubTechnologies(cleanUsername),
-    getGitHubSkills(cleanUsername),
-  ]);
+export const adaptUnifiedGitHubAnalysis = (data) => {
+  if (!data) return null;
+  const account = data.account || {};
+  const repositories = data.repositories || [];
+  const aggregated = data.aggregated_profile || {};
+  const coverage = aggregated.repository_coverage || {};
+  const evidenceSummary = aggregated.evidence_summary || {};
+
+  // Adapt repositories ensuring primary language and details are intact
+  const adaptedRepos = repositories.map((r) => ({
+    ...r,
+    language: r.primary_language || r.language || (r.languages && r.languages[0]) || null,
+  }));
+
+  // Adapt technologies for TechnologyAnalysis component
+  const adaptedTechnologies = {
+    total_repositories: coverage.total_repositories_analyzed ?? adaptedRepos.length,
+    technologies: (aggregated.technologies || []).map((t) => ({
+      name: t.name,
+      repository_count: t.repository_count,
+      evidence_count: t.evidence_count ?? 0,
+      supporting_repositories: t.supporting_repositories || [],
+    })),
+  };
+
+  // Adapt skills for SkillCategoryGrid component
+  const adaptedSkills = {
+    total_unique_technologies:
+      aggregated.total_unique_technologies ??
+      aggregated.total_unique_skills ??
+      (aggregated.skills?.length ?? 0),
+    categories: aggregated.categorized_skills || [],
+    skills: aggregated.skills || [],
+  };
 
   return {
-    profile,
-    repos,
-    technologies,
-    skills,
+    // Canonical unified data contracts from Task 2–7
+    account,
+    repositories: adaptedRepos,
+    aggregated_profile: aggregated,
+    repository_coverage: coverage,
+    evidence_summary: evidenceSummary,
+
+    // Backward-compatible props for existing UI components
+    profile: account,
+    repos: adaptedRepos,
+    technologies: adaptedTechnologies,
+    skills: adaptedSkills,
   };
 };
 
+/**
+ * Fetch unified GitHub account intelligence with ONE single backend request:
+ * GET /api/v1/github/analysis?username=<usernameOrUrl>
+ *
+ * Orchestrates account discovery, repository cataloging, deep architectural inspection,
+ * evidence extraction, and cross-repository account aggregation in a single call.
+ *
+ * @param {string} usernameOrUrl - GitHub username, @username, or profile URL
+ * @returns {Promise<Object>} Adapted unified GitHub analysis
+ */
+export const getGitHubAccountAnalysis = async (usernameOrUrl) => {
+  const cleanInput = (usernameOrUrl || '').trim();
+  const response = await apiClient.get('/github/analysis', {
+    params: {
+      username: cleanInput,
+    },
+  });
+  return adaptUnifiedGitHubAnalysis(response.data);
+};
+
+/**
+ * Aggregator: Uses unified account analysis endpoint to fetch the complete
+ * developer profile in ONE single request, avoiding 4 duplicate roundtrips.
+ *
+ * @param {string} username - GitHub username or profile URL
+ * @returns {Promise<Object>} Adapted unified GitHub analysis
+ */
+export const getCompleteGitHubAnalysis = async (username) => {
+  return getGitHubAccountAnalysis(username);
+};
+
 export default {
+  getGitHubAccountAnalysis,
+  adaptUnifiedGitHubAnalysis,
+  getCompleteGitHubAnalysis,
   getGitHubProfile,
   getGitHubRepositories,
   getGitHubTechnologies,
   getGitHubSkills,
-  getCompleteGitHubAnalysis,
 };

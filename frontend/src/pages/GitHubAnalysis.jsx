@@ -7,7 +7,9 @@ import TechnologyAnalysis from '../components/github/TechnologyAnalysis';
 import SkillCategoryGrid from '../components/github/SkillCategoryGrid';
 import RepositoryTable from '../components/github/RepositoryTable';
 import GitHubInitialEmptyState from '../components/github/GitHubInitialEmptyState';
-import { getCompleteGitHubAnalysis } from '../services/githubService';
+import RepositoryCoverageCards from '../components/github/RepositoryCoverageCards';
+import EvidenceSummaryPanel from '../components/github/EvidenceSummaryPanel';
+import { getGitHubAccountAnalysis } from '../services/githubService';
 
 export const GitHubAnalysis = () => {
   const [username, setUsername] = useState('');
@@ -17,10 +19,10 @@ export const GitHubAnalysis = () => {
   const [validationError, setValidationError] = useState(null);
 
   const handleAnalyze = async () => {
-    const cleanUsername = username.trim();
+    const cleanInput = username.trim();
 
-    if (!cleanUsername) {
-      setValidationError('GitHub username is required. Please enter a valid public handle.');
+    if (!cleanInput) {
+      setValidationError('GitHub username or profile URL is required. Please enter a valid public handle or URL.');
       return;
     }
 
@@ -29,37 +31,67 @@ export const GitHubAnalysis = () => {
     setError(null);
 
     try {
-      const data = await getCompleteGitHubAnalysis(cleanUsername);
+      // Single unified backend request orchestrating discovery, inspection, evidence, and aggregation
+      const data = await getGitHubAccountAnalysis(cleanInput);
       setAnalysisData(data);
       setError(null);
     } catch (err) {
       const rawMessage = err.message || '';
-      const statusMatch = rawMessage.match(/\b(404|403|422|429|500|502|504)\b/);
-      const httpStatus = statusMatch ? parseInt(statusMatch[1], 10) : err.response?.status;
+      const httpStatus =
+        err.status ||
+        (rawMessage.match(/\b(404|403|422|429|500|502|504)\b/)
+          ? parseInt(rawMessage.match(/\b(404|403|422|429|500|502|504)\b/)[1], 10)
+          : null);
 
       let errorTitle = 'GitHub Analysis Failed';
-      let errorMessage = 'An unexpected error occurred while communicating with GitHub services.';
+      let errorMessage =
+        rawMessage || 'An unexpected error occurred while communicating with GitHub services.';
 
       if (httpStatus === 404 || rawMessage.toLowerCase().includes('not found')) {
         errorTitle = 'GitHub Account Not Found';
-        errorMessage = `The user "${cleanUsername}" does not exist on GitHub or could not be found. Please check the spelling.`;
-      } else if (httpStatus === 403 || rawMessage.toLowerCase().includes('rate limit') || rawMessage.toLowerCase().includes('forbidden')) {
+        errorMessage = rawMessage.toLowerCase().includes('not found')
+          ? rawMessage
+          : `The user "${cleanInput}" does not exist on GitHub or could not be found. Please check the spelling.`;
+      } else if (
+        httpStatus === 422 ||
+        rawMessage.toLowerCase().includes('unprocessable') ||
+        rawMessage.toLowerCase().includes('invalid')
+      ) {
+        errorTitle = 'Invalid GitHub Target';
+        errorMessage = rawMessage || 'The username or profile URL is invalid or malformed.';
+      } else if (
+        httpStatus === 403 ||
+        httpStatus === 429 ||
+        rawMessage.toLowerCase().includes('rate limit') ||
+        rawMessage.toLowerCase().includes('forbidden') ||
+        rawMessage.toLowerCase().includes('too many requests')
+      ) {
         errorTitle = 'GitHub API Rate Limit Reached';
-        errorMessage = 'The unauthenticated GitHub API hourly quota has been exceeded or access was restricted. Please wait a short while or configure a personal token on the backend.';
-      } else if (httpStatus === 502 || rawMessage.toLowerCase().includes('connect to github')) {
+        errorMessage =
+          rawMessage ||
+          'The GitHub API rate limit has been exceeded. Please wait a short while or configure a personal token on the backend.';
+      } else if (
+        httpStatus === 502 ||
+        rawMessage.toLowerCase().includes('connect to github') ||
+        rawMessage.toLowerCase().includes('unable to reach')
+      ) {
         errorTitle = 'GitHub Connectivity Error';
-        errorMessage = 'The backend service could not establish a connection to api.github.com. Please check external network availability.';
+        errorMessage =
+          rawMessage ||
+          'The backend service could not establish a connection to api.github.com. Please check external network availability.';
       } else if (httpStatus === 504 || rawMessage.toLowerCase().includes('timed out')) {
         errorTitle = 'GitHub Gateway Timeout';
-        errorMessage = 'GitHub API took longer than 10 seconds to respond. The account may have an exceptionally large repository index.';
-      } else if (httpStatus === 422 || rawMessage.toLowerCase().includes('unprocessable')) {
-        errorTitle = 'Invalid Request Parameter';
-        errorMessage = 'The username contains characters unsupported by the GitHub API.';
-      } else if (rawMessage.toLowerCase().includes('network') || rawMessage.toLowerCase().includes('failed to fetch') || rawMessage.toLowerCase().includes('connect')) {
+        errorMessage =
+          rawMessage ||
+          'GitHub API took longer than expected to respond. The account may have an exceptionally large repository index.';
+      } else if (
+        rawMessage.toLowerCase().includes('network') ||
+        rawMessage.toLowerCase().includes('failed to fetch') ||
+        rawMessage.toLowerCase().includes('connect')
+      ) {
         errorTitle = 'Backend Server Offline';
-        errorMessage = 'Unable to reach the FastAPI backend server at http://localhost:8000. Please verify that the backend process is running.';
-      } else if (rawMessage) {
-        errorMessage = rawMessage;
+        errorMessage =
+          'Unable to reach the FastAPI backend server at http://localhost:8000. Please verify that the backend process is running.';
       }
 
       setError({
@@ -67,7 +99,6 @@ export const GitHubAnalysis = () => {
         message: errorMessage,
         status: httpStatus || null,
       });
-      // Do not clear previous data on failure, or clear if desired to prevent confusion
       setAnalysisData(null);
     } finally {
       setLoading(false);
@@ -120,13 +151,19 @@ export const GitHubAnalysis = () => {
             skills={analysisData.skills}
           />
 
-          {/* SECTION 5 — TECHNOLOGY ANALYSIS & BAR CHART */}
+          {/* SECTION 5 — REPOSITORY COVERAGE */}
+          <RepositoryCoverageCards coverage={analysisData.repository_coverage} />
+
+          {/* SECTION 6 — EVIDENCE SUMMARY */}
+          <EvidenceSummaryPanel evidenceSummary={analysisData.evidence_summary} />
+
+          {/* SECTION 7 — TECHNOLOGY ANALYSIS & BAR CHART */}
           <TechnologyAnalysis technologiesData={analysisData.technologies} />
 
-          {/* SECTION 6 — CATEGORIZED SKILLS */}
+          {/* SECTION 8 — CATEGORIZED SKILLS */}
           <SkillCategoryGrid skillsData={analysisData.skills} />
 
-          {/* SECTION 7 — REPOSITORY CATALOG TABLE */}
+          {/* SECTION 9 — REPOSITORY CATALOG TABLE */}
           <RepositoryTable repos={analysisData.repos} />
         </div>
       ) : (

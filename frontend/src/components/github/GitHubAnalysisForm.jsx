@@ -22,7 +22,7 @@ export const GitHubAnalysisForm = ({
   return (
     <Card
       title="Analyze GitHub Target"
-      subtitle="Enter a public GitHub username to query repositories, extract language patterns, and categorize skill competencies."
+      subtitle="Enter a public GitHub username or profile URL to inspect repositories, extract language patterns, and synthesize account-level skill intelligence."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -30,7 +30,7 @@ export const GitHubAnalysisForm = ({
             htmlFor="github-username-field"
             className="block text-xs font-semibold text-slate-700 mb-1.5"
           >
-            GitHub Username <span className="text-rose-500">*</span>
+            GitHub Username or Profile URL <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -42,7 +42,7 @@ export const GitHubAnalysisForm = ({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
-              placeholder="e.g. octocat, torvalds, gaearon"
+              placeholder="e.g. octocat, @octocat, or https://github.com/octocat"
               className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${
                 validationError
                   ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-200'

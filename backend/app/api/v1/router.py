@@ -7,6 +7,7 @@ from app.api.routes.developer_profile import (
     router as developer_profile_router,
 )
 from app.api.routes.evidence import router as evidence_router
+from app.api.routes.github import router as github_router
 from app.api.routes.job_matching import router as job_matching_router
 from app.api.routes.repository_architecture import (
     router as repository_architecture_router,
@@ -19,6 +20,7 @@ api_router = APIRouter()
 
 # Include sub-routers under API v1
 api_router.include_router(system_router)
+api_router.include_router(github_router)
 api_router.include_router(skill_gap_router, prefix="/skill-gap")
 api_router.include_router(
     career_recommendation_router, prefix="/career-recommendations"

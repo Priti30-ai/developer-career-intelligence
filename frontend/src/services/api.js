@@ -44,7 +44,15 @@ apiClient.interceptors.response.use(
       message = error.message;
     }
 
-    return Promise.reject(new Error(message));
+    const customError = new Error(message);
+    if (error.response?.status) {
+      customError.status = error.response.status;
+    }
+    if (error.response?.data) {
+      customError.response = error.response;
+    }
+
+    return Promise.reject(customError);
   }
 );
 

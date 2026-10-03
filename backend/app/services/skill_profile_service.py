@@ -17,37 +17,39 @@ PROGRAMMING_LANGUAGES: Set[str] = {
 FRAMEWORKS_AND_LIBRARIES: Set[str] = {
     "React", "Angular", "Vue.js", "React Native", "Next.js", "NestJS",
     "Node.js", "Express", "Django", "Flask", "FastAPI", "Spring",
+    "Spring Boot", "Gin", "Fiber", "Actix Web", "Tokio", "Axios",
     "Laravel", "Rails", "Symfony", "ASP.NET", ".NET", "jQuery",
     "Bootstrap", "Tailwind CSS", "Redux", "Svelte", "Nuxt.js",
-    "TensorFlow", "PyTorch", "Keras", "Scikit-learn", "Pandas",
-    "NumPy", "OpenCV", "Hugging Face", "LangChain",
+    "TensorFlow", "TensorFlow.js", "PyTorch", "Keras", "Scikit-learn", "Pandas",
+    "NumPy", "OpenCV", "Hugging Face", "LangChain", "Prisma", "SQLAlchemy",
 }
 
 AI_MACHINE_LEARNING: Set[str] = {
     "Machine Learning", "Deep Learning", "Artificial Intelligence",
     "NLP", "Computer Vision", "Generative AI", "LLM",
-    "TensorFlow", "PyTorch", "Scikit-learn", "Keras", "Pandas", "NumPy",
+    "TensorFlow", "TensorFlow.js", "PyTorch", "Scikit-learn", "Keras", "Pandas", "NumPy",
     "Data Science", "Neural Network", "Reinforcement Learning",
-    "Natural Language Processing",
+    "Natural Language Processing", "SciPy", "Matplotlib", "Seaborn",
 }
 
 WEB_TECHNOLOGIES: Set[str] = {
     "HTML", "CSS", "Bootstrap", "Tailwind CSS", "REST API", "GraphQL",
     "Web Development", "Web Design", "API", "JSON", "XML",
-    "WebSockets", "Progressive Web App", "Webpack", "Vite",
+    "WebSockets", "Progressive Web App", "Webpack", "Vite", "Axios",
 }
 
 DATABASES: Set[str] = {
     "MySQL", "PostgreSQL", "MongoDB", "SQLite", "Redis", "Oracle",
     "SQL", "MariaDB", "Cassandra", "DynamoDB", "Elasticsearch",
-    "Neo4j", "InfluxDB", "Firebase",
+    "Neo4j", "InfluxDB", "Firebase", "Prisma", "SQLAlchemy", "Alembic",
 }
 
 DEVOPS_AND_CLOUD: Set[str] = {
     "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Google Cloud",
     "GitHub Actions", "CI/CD", "Terraform", "Ansible", "Jenkins",
     "Git", "GitHub", "Linux", "Nginx", "Apache", "Heroku",
-    "Vercel", "Netlify", "DigitalOcean",
+    "Vercel", "Netlify", "DigitalOcean", "RabbitMQ", "Apache Kafka",
+    "Cargo", "Maven", "Gradle",
 }
 
 # Ordered list of (category_name, category_set) used for classification.
