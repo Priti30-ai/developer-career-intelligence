@@ -8,6 +8,7 @@ import ResumeAnalysis from './pages/ResumeAnalysis';
 import JobMatching from './pages/JobMatching';
 import SkillGap from './pages/SkillGap';
 import CareerRecommendations from './pages/CareerRecommendations';
+import LearningRoadmap from './pages/LearningRoadmap';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -93,20 +94,7 @@ function App() {
           <Route path={APP_ROUTES.JOB_MATCHING} element={<JobMatching />} />
           <Route
             path={APP_ROUTES.LEARNING_ROADMAP}
-            element={
-              <ModulePlaceholder
-                moduleName="Learning Roadmap"
-                group="Career Intelligence"
-                description={getItemConfig(APP_ROUTES.LEARNING_ROADMAP).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.LEARNING_ROADMAP).apiEndpoint}
-                plannedCapabilities={[
-                  'Step-by-step milestone curricula targeted to identified skill gaps',
-                  'Curated documentation, textbooks, and repository projects',
-                  'Estimated hours to competency based on learning curve models',
-                  'Milestone completion checklists with progress persistence'
-                ]}
-              />
-            }
+            element={<LearningRoadmap />}
           />
 
           {/* Documents Routes */}
