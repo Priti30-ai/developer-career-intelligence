@@ -78,8 +78,8 @@ export const NAVIGATION_CONFIG = [
         path: APP_ROUTES.REPOSITORY_ARCHITECTURE,
         icon: 'Network',
         description: 'Structural pattern detection, module modularity, and layered architectural analysis of developer repositories.',
-        apiEndpoint: '/api/v1/repository-architecture',
-        status: 'in-progress',
+        apiEndpoint: '/api/v1/repository-architecture/analyze',
+        status: 'active',
       },
       {
         name: 'Evidence',

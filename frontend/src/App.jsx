@@ -9,6 +9,7 @@ import JobMatching from './pages/JobMatching';
 import SkillGap from './pages/SkillGap';
 import CareerRecommendations from './pages/CareerRecommendations';
 import LearningRoadmap from './pages/LearningRoadmap';
+import RepositoryArchitecture from './pages/RepositoryArchitecture';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -53,20 +54,7 @@ function App() {
           <Route path={APP_ROUTES.SKILL_GAPS} element={<SkillGap />} />
           <Route
             path={APP_ROUTES.REPOSITORY_ARCHITECTURE}
-            element={
-              <ModulePlaceholder
-                moduleName="Repository Architecture"
-                group="Developer Analysis"
-                description={getItemConfig(APP_ROUTES.REPOSITORY_ARCHITECTURE).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.REPOSITORY_ARCHITECTURE).apiEndpoint}
-                plannedCapabilities={[
-                  'Directory depth, modularity, and layer separation metrics',
-                  'Framework pattern detection (MVC, Clean Architecture, Microservices)',
-                  'Code coupling, dependency tree depth, and cyclomatic complexity',
-                  'Automated architectural health ratings'
-                ]}
-              />
-            }
+            element={<RepositoryArchitecture />}
           />
           <Route
             path={APP_ROUTES.EVIDENCE}
