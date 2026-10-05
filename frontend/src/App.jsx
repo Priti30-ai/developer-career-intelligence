@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import ModulePlaceholder from './pages/ModulePlaceholder';
 import GitHubAnalysis from './pages/GitHubAnalysis';
 import ResumeAnalysis from './pages/ResumeAnalysis';
+import JobMatching from './pages/JobMatching';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -116,23 +117,7 @@ function App() {
               />
             }
           />
-          <Route
-            path={APP_ROUTES.JOB_MATCHING}
-            element={
-              <ModulePlaceholder
-                moduleName="Job Matching"
-                group="Career Intelligence"
-                description={getItemConfig(APP_ROUTES.JOB_MATCHING).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.JOB_MATCHING).apiEndpoint}
-                plannedCapabilities={[
-                  'Semantic embedding similarity against verified job postings',
-                  'Threshold matching breakdown (experience, stack, seniority)',
-                  'Custom filter controls by location, remote policy, and role type',
-                  'Match confidence breakdown with grounded justification'
-                ]}
-              />
-            }
-          />
+          <Route path={APP_ROUTES.JOB_MATCHING} element={<JobMatching />} />
           <Route
             path={APP_ROUTES.LEARNING_ROADMAP}
             element={

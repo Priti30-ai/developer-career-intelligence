@@ -106,9 +106,9 @@ export const NAVIGATION_CONFIG = [
         name: 'Job Matching',
         path: APP_ROUTES.JOB_MATCHING,
         icon: 'Briefcase',
-        description: 'Semantic matching against live market postings, role requirements, and domain criteria.',
-        apiEndpoint: '/api/v1/job-matching',
-        status: 'in-progress',
+        description: 'Deterministic skill matching and gap coverage analysis against job description requirements.',
+        apiEndpoint: '/api/v1/job-matching/analyze',
+        status: 'active',
       },
       {
         name: 'Learning Roadmap',
