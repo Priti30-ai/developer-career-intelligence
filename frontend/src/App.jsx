@@ -6,6 +6,7 @@ import ModulePlaceholder from './pages/ModulePlaceholder';
 import GitHubAnalysis from './pages/GitHubAnalysis';
 import ResumeAnalysis from './pages/ResumeAnalysis';
 import JobMatching from './pages/JobMatching';
+import SkillGap from './pages/SkillGap';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -47,23 +48,7 @@ function App() {
               />
             }
           />
-          <Route
-            path={APP_ROUTES.SKILL_GAPS}
-            element={
-              <ModulePlaceholder
-                moduleName="Skill Gaps"
-                group="Developer Analysis"
-                description={getItemConfig(APP_ROUTES.SKILL_GAPS).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.SKILL_GAPS).apiEndpoint}
-                plannedCapabilities={[
-                  'Comparative delta against target role benchmarks',
-                  'Categorization of missing, nascent, and proficient competencies',
-                  'Weighting of essential vs nice-to-have technical skills',
-                  'Impact score estimation for closing specific gaps'
-                ]}
-              />
-            }
-          />
+          <Route path={APP_ROUTES.SKILL_GAPS} element={<SkillGap />} />
           <Route
             path={APP_ROUTES.REPOSITORY_ARCHITECTURE}
             element={

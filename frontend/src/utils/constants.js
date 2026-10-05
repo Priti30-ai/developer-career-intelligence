@@ -70,8 +70,8 @@ export const NAVIGATION_CONFIG = [
         path: APP_ROUTES.SKILL_GAPS,
         icon: 'Target',
         description: 'Comparative gap calculations between candidate skill sets and target role benchmarks.',
-        apiEndpoint: '/api/v1/skill-gap',
-        status: 'in-progress',
+        apiEndpoint: '/api/v1/skill-gap/analyze',
+        status: 'active',
       },
       {
         name: 'Repository Architecture',
