@@ -7,6 +7,7 @@ import GitHubAnalysis from './pages/GitHubAnalysis';
 import ResumeAnalysis from './pages/ResumeAnalysis';
 import JobMatching from './pages/JobMatching';
 import SkillGap from './pages/SkillGap';
+import CareerRecommendations from './pages/CareerRecommendations';
 import { APP_ROUTES, NAVIGATION_CONFIG } from './utils/constants';
 
 // Find item config from centralized navigation configuration
@@ -87,20 +88,7 @@ function App() {
           {/* Career Intelligence Routes */}
           <Route
             path={APP_ROUTES.CAREER_RECOMMENDATIONS}
-            element={
-              <ModulePlaceholder
-                moduleName="Career Recommendations"
-                group="Career Intelligence"
-                description={getItemConfig(APP_ROUTES.CAREER_RECOMMENDATIONS).description}
-                apiEndpoint={getItemConfig(APP_ROUTES.CAREER_RECOMMENDATIONS).apiEndpoint}
-                plannedCapabilities={[
-                  'Algorithmic suitability scoring for adjacent engineering roles',
-                  'Trajectory progression modeling (Junior -> Mid -> Senior -> Staff)',
-                  'Market demand alignment and compensation bracket indicators',
-                  'Actionable prerequisites for career pivots'
-                ]}
-              />
-            }
+            element={<CareerRecommendations />}
           />
           <Route path={APP_ROUTES.JOB_MATCHING} element={<JobMatching />} />
           <Route

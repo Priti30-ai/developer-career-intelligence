@@ -99,8 +99,8 @@ export const NAVIGATION_CONFIG = [
         path: APP_ROUTES.CAREER_RECOMMENDATIONS,
         icon: 'Compass',
         description: 'Algorithmic career progression options, role transitions, and trajectory modeling based on verified evidence.',
-        apiEndpoint: '/api/v1/career-recommendations',
-        status: 'in-progress',
+        apiEndpoint: '/api/v1/career-recommendations/analyze',
+        status: 'active',
       },
       {
         name: 'Job Matching',
